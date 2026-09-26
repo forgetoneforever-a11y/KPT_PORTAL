@@ -11,7 +11,7 @@ TOKEN = os.getenv("BOT_TOKEN", "8977128124:AAFtlQj5f08BR94kd2_WCNwX0FXMq8Fo0h4")
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# --- ДОБАВЛЯЕМ ОБРАБОТЧИК КОМАНДЫ /START ---
+# Обработчик команды /start
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     await message.answer(
@@ -23,10 +23,11 @@ WEBHOOK_URL = f"https://kpt-portal.onrender.com/webhook/{TOKEN}"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Автоматически регистрируем вебхук в Telegram при запуске сервера
+    # Принудительно устанавливаем вебхук при запуске
     await bot.set_webhook(WEBHOOK_URL)
+    print(f"Webhook set to: {WEBHOOK_URL}")
     yield
-    # Очищаем вебхук при выключении
+    # Удаляем вебхук при выключении
     await bot.delete_webhook()
 
 # Создаем приложение FastAPI с поддержкой lifespan
@@ -55,7 +56,8 @@ async def telegram_webhook(request: Request):
 
     return {"status": "ok"}
   except Exception as e:
-    print(f"Error handling webhook: {e}")
+    import traceback
+    traceback.print_exc()  реклама ошибки в логах
     return JSONResponse(status_code=500, content={"error": str(e)})
 
 
