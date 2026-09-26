@@ -1,4 +1,5 @@
 import os
+from contextlib import asynccontextmanager
 from aiogram import Bot, Dispatcher, types
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -9,8 +10,19 @@ TOKEN = os.getenv("BOT_TOKEN", "8977128124:AAFtlQj5f08BR94kd2_WCNwX0FXMq8Fo0h4")
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# Создаем приложение FastAPI
-app = FastAPI()
+# Указываем ваш публичный URL на Render
+WEBHOOK_URL = f"https://kpt-portal.onrender.com/webhook/{TOKEN}"
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Автоматически регистрируем вебхук в Telegram при запуске сервера
+    await bot.set_webhook(WEBHOOK_URL)
+    yield
+    # Очищаем вебхук при выключении
+    await bot.delete_webhook()
+
+# Создаем приложение FastAPI с поддержкой lifespan
+app = FastAPI(lifespan=lifespan)
 
 # Подключаем папку templates для рендеринга HTML-страниц
 templates = Jinja2Templates(directory="templates")
