@@ -1,5 +1,6 @@
 import os
-from flask import Flask, render_template, request, jsonify
+import asyncio
+from flask import Flask, render_template, request
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
@@ -69,17 +70,17 @@ def index():
     return render_template("index.html")
 
 @app.route(f"/webhook/{TOKEN}", methods=["POST"])
-async def telegram_webhook():
-    """Этот маршрут принимает запросы от Telegram"""
+def telegram_webhook():
+    """Синхронный роут Flask, который безопасно передает апдейт в aiogram через asyncio.run"""
     update = types.Update.model_validate(
         request.get_json(force=True), context={"bot": bot}
     )
-    await dp.feed_update(bot, update)
+    asyncio.run(dp.feed_update(bot, update))
     return "OK", 200
 
 
 if __name__ == "__main__":
-    # При старте приложения регистрируем Webhook в Telegram автоматически
+    # При старте автоматически регистрируем Webhook в Telegram
     import requests
     webhook_url = f"{WEB_APP_URL}/webhook/{TOKEN}"
     requests.get(f"https://api.telegram.org/bot{TOKEN}/setWebhook?url={webhook_url}")
