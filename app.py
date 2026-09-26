@@ -1,6 +1,7 @@
 import os
 from contextlib import asynccontextmanager
 from aiogram import Bot, Dispatcher, types
+from aiogram.filters import Command
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -9,6 +10,13 @@ from fastapi.templating import Jinja2Templates
 TOKEN = os.getenv("BOT_TOKEN", "8977128124:AAFtlQj5f08BR94kd2_WCNwX0FXMq8Fo0h4")
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
+
+# --- ДОБАВЛЯЕМ ОБРАБОТЧИК КОМАНДЫ /START ---
+@dp.message(Command("start"))
+async def cmd_start(message: types.Message):
+    await message.answer(
+        "Привет! Я твой бот-помощник для учебы. 📚\nИспользуй кнопки ниже для быстрого доступа:"
+    )
 
 # Указываем ваш публичный URL на Render
 WEBHOOK_URL = f"https://kpt-portal.onrender.com/webhook/{TOKEN}"
