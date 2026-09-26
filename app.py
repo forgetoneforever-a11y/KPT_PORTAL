@@ -57,7 +57,7 @@ async def telegram_webhook(request: Request):
     return {"status": "ok"}
   except Exception as e:
     import traceback
-    traceback.print_exc()  реклама ошибки в логах
+    traceback.print_exc()  # вывод ошибки в логах
     return JSONResponse(status_code=500, content={"error": str(e)})
 
 
