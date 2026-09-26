@@ -42,7 +42,7 @@
         }
 
         .glass-panel {
-            background: rgba(20, 24, 39, 0.75);
+            background: rgba(20, 24, 39, 0.65);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.12);
@@ -58,21 +58,14 @@
         
         .glass-card:hover {
             border-color: rgba(129, 140, 248, 0.4);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
             box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.2);
         }
 
         .glass-input {
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(15, 23, 42, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
-            font-size: 16px; /* Предотвращает зум на iOS */
-        }
-        
-        @media (min-width: 640px) {
-            .glass-input {
-                font-size: 0.875rem;
-            }
         }
         
         .glass-input:focus {
@@ -82,96 +75,99 @@
         }
 
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
         }
         ::-webkit-scrollbar-track {
             background: rgba(15, 23, 42, 0.5);
         }
         ::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body id="appBody" class="bg-preset-gradient text-slate-100 h-full min-h-screen font-sans antialiased selection:bg-indigo-500 selection:text-white">
 
-    <!-- Модальное окно авторизации -->
-    <div id="authModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center z-50 p-4">
-        <div class="glass-panel p-6 sm:p-8 rounded-3xl w-full max-w-md relative overflow-hidden border border-white/20 shadow-2xl">
+    <!-- Модальное окно авторизации (сохраняется в localStorage) -->
+    <div id="authModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="glass-panel p-8 rounded-3xl w-full max-w-md relative overflow-hidden border border-white/20 shadow-2xl">
             <div class="absolute -top-12 -right-12 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl"></div>
             
             <div class="text-center mb-6">
-                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 shadow-lg shadow-indigo-500/40 mb-3 border border-white/20">
-                    <i class="fa-solid fa-graduation-cap text-xl text-white"></i>
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 shadow-lg shadow-indigo-500/40 mb-3 border border-white/20">
+                    <i class="fa-solid fa-graduation-cap text-2xl text-white"></i>
                 </div>
-                <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">Вход в КПТ Портал</h2>
-                <p class="text-xs text-slate-400 mt-1">Введите ваши ФИО и выберите группу</p>
+                <h2 class="text-2xl font-extrabold tracking-tight text-white">Вход в КПТ Портал</h2>
+                <p class="text-xs text-slate-400 mt-1">Введите ваши ФИО и выберите группу (данные сохранятся)</p>
             </div>
 
             <form id="authForm" onsubmit="handleAuth(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">ФИО студента</label>
                     <input type="text" id="nameInput" required placeholder="Например: Шарапов Я." 
-                        class="glass-input w-full px-4 py-3 rounded-xl text-slate-100 placeholder-slate-500">
+                        class="glass-input w-full px-4 py-3 rounded-xl text-slate-100 placeholder-slate-500 text-sm">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Группа</label>
-                    <select id="groupInput" class="glass-input w-full px-4 py-3 rounded-xl text-slate-100">
+                    <select id="groupInput" class="glass-input w-full px-4 py-3 rounded-xl text-slate-100 text-sm">
                         <option value="211">Группа 211 (1-09)</option>
                         <option value="167">Группа 167 (1-09)</option>
                     </select>
                 </div>
-                <button type="submit" class="w-full py-3.5 px-4 rounded-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 hover:opacity-90 text-white shadow-lg shadow-indigo-600/30 transition-all active:scale-95">
+                <button type="submit" class="w-full py-3.5 px-4 rounded-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 hover:opacity-90 text-white shadow-lg shadow-indigo-600/30 transition-all transform hover:-translate-y-0.5">
                     Сохранить и войти
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- Модальное окно настроек -->
-    <div id="settingsModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center z-50 p-4">
-        <div class="glass-panel p-5 sm:p-8 rounded-3xl w-full max-w-2xl relative overflow-hidden border border-white/20 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+    <!-- Модальное окно настроек (фон и JSON расписания) -->
+    <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="glass-panel p-6 sm:p-8 rounded-3xl w-full max-w-2xl relative overflow-hidden border border-white/20 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-white/10 pb-4">
-                <h3 class="text-lg sm:text-xl font-bold text-white flex items-center space-x-2">
+                <h3 class="text-xl font-bold text-white flex items-center space-x-2">
                     <i class="fa-solid fa-gear text-indigo-400"></i>
-                    <span>Настройки</span>
+                    <span>Настройки оформления и данных</span>
                 </h3>
                 <button onclick="closeSettingsModal()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
+            <!-- Стили фона -->
             <div class="space-y-3">
                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Выберите стиль фона</label>
-                <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <button onclick="setThemeBackground('bg-preset-gradient')" class="glass-input p-3 rounded-2xl text-left border hover:border-indigo-400 transition-all flex flex-col space-y-2">
-                        <div class="w-full h-6 rounded-lg bg-gradient-to-r from-slate-900 via-indigo-900 to-violet-900"></div>
+                        <div class="w-full h-8 rounded-xl bg-gradient-to-r from-slate-900 via-indigo-900 to-violet-900"></div>
                         <span class="text-xs font-bold text-slate-200">Градиент</span>
                     </button>
                     <button onclick="setThemeBackground('bg-preset-cosmos')" class="glass-input p-3 rounded-2xl text-left border hover:border-indigo-400 transition-all flex flex-col space-y-2">
-                        <div class="w-full h-6 rounded-lg bg-indigo-950 border border-white/10"></div>
+                        <div class="w-full h-8 rounded-xl bg-indigo-950 border border-white/10"></div>
                         <span class="text-xs font-bold text-slate-200">Космос</span>
                     </button>
                     <button onclick="setThemeBackground('bg-preset-cyberpunk')" class="glass-input p-3 rounded-2xl text-left border hover:border-indigo-400 transition-all flex flex-col space-y-2">
-                        <div class="w-full h-6 rounded-lg bg-gradient-to-r from-slate-900 via-purple-950 to-rose-950"></div>
+                        <div class="w-full h-8 rounded-xl bg-gradient-to-r from-slate-900 via-purple-950 to-rose-950"></div>
                         <span class="text-xs font-bold text-slate-200">Киберпанк</span>
                     </button>
                     <button onclick="setThemeBackground('bg-preset-minimal')" class="glass-input p-3 rounded-2xl text-left border hover:border-indigo-400 transition-all flex flex-col space-y-2">
-                        <div class="w-full h-6 rounded-lg bg-slate-950 border border-white/10"></div>
+                        <div class="w-full h-8 rounded-xl bg-slate-950 border border-white/10"></div>
                         <span class="text-xs font-bold text-slate-200">Минимал</span>
                     </button>
                 </div>
             </div>
 
+            <!-- Редактор расписания JSON -->
             <div class="space-y-3 pt-2 border-t border-white/10">
                 <div class="flex justify-between items-center">
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Расписание (JSON)</label>
-                    <button onclick="resetScheduleToDefault()" class="text-[11px] text-indigo-300 hover:text-white underline">Сбросить</button>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Исходный код расписания (JSON)</label>
+                    <button onclick="resetScheduleToDefault()" class="text-[11px] text-indigo-300 hover:text-white underline">Сбросить по умолчанию</button>
                 </div>
-                <textarea id="scheduleJsonInput" rows="6" class="glass-input w-full p-3 rounded-xl font-mono text-xs text-indigo-200 resize-y"></textarea>
+                <p class="text-xs text-slate-400">Измените JSON-структуру расписания ниже и сохраните:</p>
+                <textarea id="scheduleJsonInput" rows="8" class="glass-input w-full p-3 rounded-xl font-mono text-xs text-indigo-200 resize-y"></textarea>
                 <button onclick="saveScheduleFromJson()" class="w-full py-2.5 rounded-xl font-bold bg-indigo-600/50 hover:bg-indigo-600 text-white text-sm transition-all border border-indigo-400/30">
-                    Сохранить расписание
+                    Применить расписание из JSON
                 </button>
             </div>
 
@@ -182,32 +178,34 @@
     </div>
 
     <!-- Модальное окно календаря -->
-    <div id="calendarModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center z-50 p-4">
-        <div class="glass-panel p-5 sm:p-8 rounded-3xl w-full max-w-lg relative overflow-hidden border border-white/20 shadow-2xl space-y-4">
-            <div class="flex justify-between items-center border-b border-white/10 pb-3">
-                <h3 class="text-base sm:text-lg font-bold text-white flex items-center space-x-2">
-                    <i class="fa-solid fa-calendar-plus text-indigo-400"></i>
-                    <span>Заметка на <span id="modalDateTitle" class="text-indigo-300"></span></span>
-                </h3>
+    <div id="calendarModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="glass-panel p-6 sm:p-8 rounded-3xl w-full max-w-lg relative overflow-hidden border border-white/20 shadow-2xl space-y-5">
+            <div class="flex justify-between items-center border-b border-white/10 pb-4">
+                <div>
+                    <h3 class="text-xl font-bold text-white flex items-center space-x-2">
+                        <i class="fa-solid fa-calendar-plus text-indigo-400"></i>
+                        <span>Заметка на <span id="modalDateTitle" class="text-indigo-300"></span></span>
+                    </h3>
+                </div>
                 <button onclick="closeCalendarModal()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
-            <form onsubmit="saveCalendarNote(event)" class="space-y-3">
+            <form onsubmit="saveCalendarNote(event)" class="space-y-4">
                 <input type="hidden" id="selectedModalDate">
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Текст заметки</label>
-                    <textarea id="noteText" required rows="2" placeholder="Например: Сдать чертеж..." class="glass-input w-full p-3 rounded-xl text-slate-100 placeholder-slate-500 resize-none"></textarea>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Текст заметки</label>
+                    <textarea id="noteText" required rows="3" placeholder="Например: Сдать чертеж..." class="glass-input w-full p-3 rounded-xl text-sm text-slate-100 placeholder-slate-500 resize-none"></textarea>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Время</label>
-                        <input type="time" id="noteTime" value="09:00" class="glass-input w-full px-3 py-2.5 rounded-xl text-slate-100">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Время</label>
+                        <input type="time" id="noteTime" value="09:00" class="glass-input w-full px-4 py-2.5 rounded-xl text-slate-100 text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Важность</label>
-                        <select id="notePriority" class="glass-input w-full px-3 py-2.5 rounded-xl text-slate-100">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Важность</label>
+                        <select id="notePriority" class="glass-input w-full px-4 py-2.5 rounded-xl text-slate-100 text-sm">
                             <option value="high">🔥 Высокая</option>
                             <option value="medium" selected>⚡ Средняя</option>
                             <option value="low">💤 Обычная</option>
@@ -215,181 +213,180 @@
                     </div>
                 </div>
                 <button type="submit" class="w-full py-3 rounded-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 hover:opacity-90 text-white shadow-lg transition-all">
-                    Сохранить
+                    Сохранить заметку
                 </button>
             </form>
 
-            <div class="space-y-2 pt-2 border-t border-white/10">
+            <div class="space-y-3 pt-2 border-t border-white/10">
                 <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Заметки на этот день:</h4>
-                <div id="modalNotesList" class="space-y-2 max-h-32 overflow-y-auto pr-1"></div>
+                <div id="modalNotesList" class="space-y-2 max-h-40 overflow-y-auto pr-1"></div>
             </div>
         </div>
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed top-4 right-4 left-4 sm:left-auto z-50 transform translate-x-full transition-all duration-300 opacity-0 max-w-sm">
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-x-full transition-all duration-300 opacity-0 max-w-sm">
         <div class="glass-panel px-4 py-3 rounded-2xl flex items-center space-x-3 border-l-4 border-l-indigo-400 shadow-xl">
             <i id="toast-icon" class="fa-solid fa-circle-info text-indigo-400 text-xl"></i>
             <div>
-                <h5 id="toast-title" class="font-bold text-sm text-white">Уведомление</h5>
+                <h5 id="toast-title" class="font-bold text-sm">Уведомление</h5>
                 <p id="toast-msg" class="text-xs text-slate-300">Сообщение...</p>
             </div>
         </div>
     </div>
 
     <div class="min-h-screen flex flex-col relative overflow-x-hidden">
-        <div class="absolute top-[-10%] left-[-10%] w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] rounded-full bg-purple-600/20 blur-[100px] pointer-events-none"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] rounded-full bg-indigo-600/20 blur-[100px] pointer-events-none"></div>
+        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-purple-600/25 blur-[120px] pointer-events-none animate-pulse"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-600/25 blur-[120px] pointer-events-none animate-pulse" style="animation-delay: 3s;"></div>
 
         <!-- Header -->
-        <header class="glass-panel border-b border-white/10 sticky top-0 z-30 px-4 sm:px-6 py-3.5">
-            <div class="max-w-7xl mx-auto flex justify-between items-center gap-3">
-                <div class="flex items-center space-x-3 min-w-0">
-                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-md shrink-0">
-                        <i class="fa-solid fa-graduation-cap text-white text-base"></i>
+        <header class="glass-panel border-b border-white/10 sticky top-0 z-30 px-6 py-4">
+            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-md">
+                        <i class="fa-solid fa-building-columns text-white text-lg"></i>
                     </div>
-                    <div class="min-w-0">
-                        <h2 class="font-bold text-sm sm:text-base leading-tight truncate">КПТ г. Курган</h2>
-                        <p class="text-[11px] sm:text-xs text-indigo-300 font-medium truncate" id="headerGroupSub">Группа 211</p>
+                    <div>
+                        <h2 class="font-bold text-base leading-tight">КПТ г. Курган</h2>
+                        <p class="text-xs text-indigo-300 font-medium" id="headerGroupSub">Студенческий портал • Группа 211</p>
                     </div>
                 </div>
 
-                <div class="flex items-center space-x-2 shrink-0">
-                    <button onclick="openSettingsModal()" title="Настройки" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl glass-input flex items-center justify-center text-slate-300 hover:text-white hover:border-indigo-400 transition-all">
-                        <i class="fa-solid fa-gear text-sm"></i>
+                <div class="flex items-center space-x-3">
+                    <button onclick="openSettingsModal()" title="Настройки оформления и данных" class="w-10 h-10 rounded-xl glass-input flex items-center justify-center text-slate-300 hover:text-white hover:border-indigo-400 transition-all">
+                        <i class="fa-solid fa-gear"></i>
                     </button>
 
-                    <div onclick="openAuthModal()" title="Сменить профиль" class="glass-input px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl flex items-center space-x-1.5 text-xs sm:text-sm cursor-pointer hover:border-indigo-400 transition-all">
-                        <i class="fa-solid fa-circle-user text-indigo-400 text-base"></i>
-                        <span id="userNameDisplay" class="font-semibold max-w-[90px] sm:max-w-none truncate">Студент</span>
+                    <div onclick="openAuthModal()" title="Сменить имя/группу" class="glass-input px-4 py-2 rounded-xl flex items-center space-x-2 text-sm cursor-pointer hover:border-indigo-400 transition-all">
+                        <i class="fa-solid fa-circle-user text-indigo-400 text-lg"></i>
+                        <span id="userNameDisplay" class="font-semibold">Студент</span>
+                        <span class="text-[10px] bg-indigo-500/30 text-indigo-300 px-2 py-0.5 rounded-md ml-1 border border-indigo-500/30">Сменить</span>
                     </div>
                 </div>
             </div>
         </header>
 
         <!-- Main Content -->
-        <main class="max-w-7xl mx-auto w-full p-3 sm:p-6 lg:p-8 flex-1 flex flex-col gap-4 sm:gap-6 z-10">
+        <main class="max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 flex-1 flex flex-col gap-6 z-10">
             
             <!-- Hero Banner -->
-            <section class="relative rounded-2xl sm:rounded-3xl overflow-hidden glass-panel border border-white/20 shadow-xl group">
+            <section class="relative rounded-3xl overflow-hidden glass-panel border border-white/20 shadow-2xl group">
                 <div class="absolute inset-0 z-0">
-                    <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1200&q=80" alt="КПТ" class="w-full h-full object-cover opacity-15">
-                    <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-transparent"></div>
+                    <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1200&q=80" alt="КПТ" class="w-full h-full object-cover opacity-20 transform group-hover:scale-105 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent"></div>
                 </div>
 
-                <div class="relative z-10 p-5 sm:p-10 max-w-2xl flex flex-col items-start space-y-3">
-                    <span class="px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+                <div class="relative z-10 p-8 sm:p-12 max-w-2xl flex flex-col items-start space-y-4">
+                    <span class="px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-xs font-bold uppercase tracking-wider">
                         Курганский промышленный техникум
                     </span>
-                    <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
-                        Привет, <span id="welcomeUsername" class="text-indigo-400">Студент</span>! 👋
+                    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+                        Добро пожаловать, <span id="welcomeUsername" class="text-indigo-400">Студент</span>!
                     </h1>
-                    <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
-                        Управляйте расписанием, электронным дневником и домашкой прямо с телефона или ПК. Все данные сохраняются локально.
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                        Все данные автоматически сохраняются в браузере. Управляйте расписанием, дневником и домашкой без потери прогресса.
                     </p>
                 </div>
             </section>
 
             <!-- Navigation Tabs -->
-            <div class="glass-panel rounded-2xl p-1.5 w-full">
-                <div class="flex overflow-x-auto space-x-2 scrollbar-none py-0.5">
-                    <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="shrink-0 py-2.5 px-4 rounded-xl font-semibold text-xs sm:text-sm transition-all flex items-center space-x-2 bg-indigo-600 text-white shadow-md">
-                        <i class="fa-solid fa-house"></i>
-                        <span>Главная</span>
-                    </button>
-                    <button onclick="switchTab('diary')" id="tab-btn-diary" class="shrink-0 py-2.5 px-4 rounded-xl font-semibold text-xs sm:text-sm transition-all flex items-center space-x-2 text-slate-300 hover:text-white hover:bg-white/5">
-                        <i class="fa-solid fa-book-open"></i>
-                        <span>Дневник</span>
-                    </button>
-                    <button onclick="switchTab('homework')" id="tab-btn-homework" class="shrink-0 py-2.5 px-4 rounded-xl font-semibold text-xs sm:text-sm transition-all flex items-center space-x-2 text-slate-300 hover:text-white hover:bg-white/5">
-                        <i class="fa-solid fa-pen-clip"></i>
-                        <span>Домашка</span>
-                    </button>
-                    <button onclick="switchTab('schedule')" id="tab-btn-schedule" class="shrink-0 py-2.5 px-4 rounded-xl font-semibold text-xs sm:text-sm transition-all flex items-center space-x-2 text-slate-300 hover:text-white hover:bg-white/5">
-                        <i class="fa-solid fa-calendar-week"></i>
-                        <span>Расписание</span>
-                    </button>
-                    <button onclick="switchTab('calendar')" id="tab-btn-calendar" class="shrink-0 py-2.5 px-4 rounded-xl font-semibold text-xs sm:text-sm transition-all flex items-center space-x-2 text-slate-300 hover:text-white hover:bg-white/5">
-                        <i class="fa-solid fa-calendar-days"></i>
-                        <span>Календарь</span>
-                    </button>
-                    <button onclick="switchTab('stats')" id="tab-btn-stats" class="shrink-0 py-2.5 px-4 rounded-xl font-semibold text-xs sm:text-sm transition-all flex items-center space-x-2 text-slate-300 hover:text-white hover:bg-white/5">
-                        <i class="fa-solid fa-chart-pie"></i>
-                        <span>Статистика</span>
-                    </button>
-                </div>
+            <div class="flex overflow-x-auto space-x-2 p-1.5 glass-panel rounded-2xl w-full">
+                <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="flex-1 min-w-[130px] py-3 px-4 rounded-xl font-semibold text-sm transition-all flex items-center justify-center space-x-2 bg-indigo-600 text-white shadow-md">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Главная</span>
+                </button>
+                <button onclick="switchTab('diary')" id="tab-btn-diary" class="flex-1 min-w-[130px] py-3 px-4 rounded-xl font-semibold text-sm transition-all flex items-center justify-center space-x-2 text-slate-300 hover:text-white hover:bg-white/5">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>Дневник</span>
+                </button>
+                <button onclick="switchTab('homework')" id="tab-btn-homework" class="flex-1 min-w-[130px] py-3 px-4 rounded-xl font-semibold text-sm transition-all flex items-center justify-center space-x-2 text-slate-300 hover:text-white hover:bg-white/5">
+                    <i class="fa-solid fa-pen-clip"></i>
+                    <span>Домашка</span>
+                </button>
+                <button onclick="switchTab('schedule')" id="tab-btn-schedule" class="flex-1 min-w-[130px] py-3 px-4 rounded-xl font-semibold text-sm transition-all flex items-center justify-center space-x-2 text-slate-300 hover:text-white hover:bg-white/5">
+                    <i class="fa-solid fa-calendar-week"></i>
+                    <span>Расписание</span>
+                </button>
+                <button onclick="switchTab('calendar')" id="tab-btn-calendar" class="flex-1 min-w-[130px] py-3 px-4 rounded-xl font-semibold text-sm transition-all flex items-center justify-center space-x-2 text-slate-300 hover:text-white hover:bg-white/5">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>Календарь</span>
+                </button>
+                <button onclick="switchTab('stats')" id="tab-btn-stats" class="flex-1 min-w-[130px] py-3 px-4 rounded-xl font-semibold text-sm transition-all flex items-center justify-center space-x-2 text-slate-300 hover:text-white hover:bg-white/5">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Статистика</span>
+                </button>
             </div>
 
             <!-- TAB 1: DASHBOARD -->
-            <div id="tab-dashboard" class="tab-content grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-                <div onclick="switchTab('diary')" class="glass-panel p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-white/10 hover:border-indigo-500/50 cursor-pointer transition-all flex flex-col justify-between group">
+            <div id="tab-dashboard" class="tab-content grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div onclick="switchTab('diary')" class="glass-panel p-6 rounded-3xl border border-white/10 hover:border-indigo-500/50 cursor-pointer transition-all transform hover:-translate-y-1 group flex flex-col justify-between">
                     <div>
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg sm:text-xl mb-3 sm:mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
                             <i class="fa-solid fa-book-open"></i>
                         </div>
-                        <h3 class="text-lg sm:text-xl font-bold mb-1 sm:mb-2 text-white">Дневник ученика</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm">Просмотр и изменение текущих оценок.</p>
+                        <h3 class="text-xl font-bold mb-2 text-white">Дневник ученика</h3>
+                        <p class="text-slate-400 text-sm">Просмотр и изменение текущих оценок по предметам.</p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-indigo-400 font-semibold text-xs sm:text-sm">
-                        <span>Открыть</span>
-                        <i class="fa-solid fa-arrow-right"></i>
+                    <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-indigo-400 font-semibold text-sm">
+                        <span>Открыть дневник</span>
+                        <i class="fa-solid fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </div>
 
-                <div onclick="switchTab('homework')" class="glass-panel p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-white/10 hover:border-indigo-500/50 cursor-pointer transition-all flex flex-col justify-between group">
+                <div onclick="switchTab('homework')" class="glass-panel p-6 rounded-3xl border border-white/10 hover:border-indigo-500/50 cursor-pointer transition-all transform hover:-translate-y-1 group flex flex-col justify-between">
                     <div>
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-violet-500/20 text-violet-400 flex items-center justify-center text-lg sm:text-xl mb-3 sm:mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-violet-500/20 text-violet-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
                             <i class="fa-solid fa-pen-clip"></i>
                         </div>
-                        <h3 class="text-lg sm:text-xl font-bold mb-1 sm:mb-2 text-white">Домашние задания</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm">Управление заданиями и дедлайнами.</p>
+                        <h3 class="text-xl font-bold mb-2 text-white">Домашние задания</h3>
+                        <p class="text-slate-400 text-sm">Добавление, редактирование и удаление заданий.</p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-violet-400 font-semibold text-xs sm:text-sm">
-                        <span>Открыть</span>
-                        <i class="fa-solid fa-arrow-right"></i>
+                    <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-violet-400 font-semibold text-sm">
+                        <span>Открыть домашку</span>
+                        <i class="fa-solid fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </div>
 
-                <div onclick="switchTab('calendar')" class="glass-panel p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-white/10 hover:border-indigo-500/50 cursor-pointer transition-all flex flex-col justify-between group">
+                <div onclick="switchTab('calendar')" class="glass-panel p-6 rounded-3xl border border-white/10 hover:border-indigo-500/50 cursor-pointer transition-all transform hover:-translate-y-1 group flex flex-col justify-between">
                     <div>
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-lg sm:text-xl mb-3 sm:mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
                             <i class="fa-solid fa-calendar-days"></i>
                         </div>
-                        <h3 class="text-lg sm:text-xl font-bold mb-1 sm:mb-2 text-white">Календарь заметок</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm">Интерактивный планер на каждый день.</p>
+                        <h3 class="text-xl font-bold mb-2 text-white">Календарь заметок</h3>
+                        <p class="text-slate-400 text-sm">Интерактивный планер на каждый день месяца.</p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-sky-400 font-semibold text-xs sm:text-sm">
-                        <span>Открыть</span>
-                        <i class="fa-solid fa-arrow-right"></i>
+                    <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-sky-400 font-semibold text-sm">
+                        <span>Открыть календарь</span>
+                        <i class="fa-solid fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </div>
             </div>
 
             <!-- TAB 2: DIARY -->
-            <div id="tab-diary" class="tab-content hidden glass-panel p-4 sm:p-8 rounded-2xl sm:rounded-3xl space-y-4 sm:space-y-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <h3 class="text-xl sm:text-2xl font-bold flex items-center space-x-2.5">
+            <div id="tab-diary" class="tab-content hidden glass-panel p-6 sm:p-8 rounded-3xl space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <h3 class="text-2xl font-bold flex items-center space-x-3">
                         <i class="fa-solid fa-book-open text-indigo-400"></i>
                         <span>Электронный дневник</span>
                     </h3>
-                    <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                        <button onclick="addDiarySubject()" class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs sm:text-sm shadow-md">
-                            <i class="fa-solid fa-plus mr-1"></i> Предмет
+                    <div class="flex items-center space-x-3">
+                        <button onclick="addDiarySubject()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-md">
+                            <i class="fa-solid fa-plus mr-1"></i> Добавить предмет
                         </button>
-                        <div class="glass-input px-3.5 py-2 rounded-xl text-xs sm:text-sm">
+                        <div class="glass-input px-4 py-2 rounded-xl text-sm">
                             Средний балл: <span id="overallGpa" class="font-bold text-emerald-400">4.75</span>
                         </div>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-xs sm:text-sm min-w-[500px]">
+                    <table class="w-full text-left border-collapse text-sm">
                         <thead>
-                            <tr class="border-b border-white/10 uppercase text-slate-400 text-[10px] sm:text-xs">
-                                <th class="py-3 px-3">Предмет</th>
-                                <th class="py-3 px-3">Преподаватель</th>
-                                <th class="py-3 px-3">Оценки</th>
-                                <th class="py-3 px-3 text-right">Средний</th>
-                                <th class="py-3 px-3 text-center">Действия</th>
+                            <tr class="border-b border-white/10 text-xs uppercase text-slate-400">
+                                <th class="py-3 px-4">Предмет</th>
+                                <th class="py-3 px-4">Преподаватель</th>
+                                <th class="py-3 px-4">Оценки (кликните для изменения)</th>
+                                <th class="py-3 px-4 text-right">Средний</th>
+                                <th class="py-3 px-4 text-center">Действия</th>
                             </tr>
                         </thead>
                         <tbody id="diaryTableBody" class="divide-y divide-white/5"></tbody>
@@ -398,91 +395,91 @@
             </div>
 
             <!-- TAB 3: HOMEWORK -->
-            <div id="tab-homework" class="tab-content hidden glass-panel p-4 sm:p-8 rounded-2xl sm:rounded-3xl space-y-4 sm:space-y-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <h3 class="text-xl sm:text-2xl font-bold flex items-center space-x-2.5">
+            <div id="tab-homework" class="tab-content hidden glass-panel p-6 sm:p-8 rounded-3xl space-y-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-2xl font-bold flex items-center space-x-3">
                         <i class="fa-solid fa-pen-clip text-violet-400"></i>
                         <span>Домашние задания</span>
                     </h3>
-                    <button onclick="addHomework()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-xs sm:text-sm shadow-lg">
+                    <button onclick="addHomework()" class="px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm shadow-lg">
                         <i class="fa-solid fa-plus mr-1"></i> Добавить задание
                     </button>
                 </div>
-                <div id="homework-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4"></div>
+                <div id="homework-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
             <!-- TAB 4: SCHEDULE -->
-            <div id="tab-schedule" class="tab-content hidden glass-panel p-4 sm:p-8 rounded-2xl sm:rounded-3xl space-y-4 sm:space-y-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/10 pb-4">
+            <div id="tab-schedule" class="tab-content hidden glass-panel p-6 sm:p-8 rounded-3xl space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/10 pb-4">
                     <div>
-                        <h3 class="text-xl sm:text-2xl font-bold flex items-center space-x-2.5">
+                        <h3 class="text-2xl font-bold flex items-center space-x-3">
                             <i class="fa-solid fa-calendar-week text-sky-400"></i>
-                            <span id="scheduleTitleText">Расписание</span>
+                            <span id="scheduleTitleText">Расписание занятий</span>
                         </h3>
-                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Редактирование через шестеренку в шапке</p>
+                        <p class="text-xs text-slate-400 mt-1">Редактирование расписания доступно через кнопку шестеренки в шапке сайта</p>
                     </div>
-                    <button onclick="openSettingsModal()" class="px-3.5 py-2 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 font-semibold text-xs border border-indigo-500/30">
-                        <i class="fa-solid fa-code mr-1"></i> Изменить JSON
+                    <button onclick="openSettingsModal()" class="px-4 py-2 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 font-semibold text-xs border border-indigo-500/30">
+                        <i class="fa-solid fa-code mr-1"></i> Править JSON расписания
                     </button>
                 </div>
-                <div id="schedule-display-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                <div id="schedule-display-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
 
             <!-- TAB 5: CALENDAR -->
-            <div id="tab-calendar" class="tab-content hidden glass-panel p-4 sm:p-8 rounded-2xl sm:rounded-3xl space-y-4 sm:space-y-6">
-                <div class="flex flex-col sm:flex-row justify-between items-center gap-3 border-b border-white/10 pb-4">
-                    <h3 id="currentMonthYear" class="text-lg sm:text-2xl font-bold flex items-center space-x-2 text-white">
+            <div id="tab-calendar" class="tab-content hidden glass-panel p-6 sm:p-8 rounded-3xl space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-white/10 pb-4">
+                    <h3 id="currentMonthYear" class="text-2xl font-bold flex items-center space-x-3 text-white">
                         <i class="fa-solid fa-calendar-days text-sky-400"></i>
                         <span>Сентябрь 2026</span>
                     </h3>
                     <div class="flex items-center space-x-2">
-                        <button onclick="changeMonth(-1)" class="px-3 py-2 rounded-xl glass-input text-slate-200 text-xs sm:text-sm"><i class="fa-solid fa-chevron-left"></i></button>
-                        <button onclick="goToCurrentMonth()" class="px-3 py-2 rounded-xl glass-input text-[11px] sm:text-xs font-semibold text-indigo-300">Сегодня</button>
-                        <button onclick="changeMonth(1)" class="px-3 py-2 rounded-xl glass-input text-slate-200 text-xs sm:text-sm"><i class="fa-solid fa-chevron-right"></i></button>
+                        <button onclick="changeMonth(-1)" class="px-3.5 py-2 rounded-xl glass-input text-slate-200 hover:border-indigo-400"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button onclick="goToCurrentMonth()" class="px-4 py-2 rounded-xl glass-input text-xs font-semibold text-indigo-300 hover:border-indigo-400">Сегодня</button>
+                        <button onclick="changeMonth(1)" class="px-3.5 py-2 rounded-xl glass-input text-slate-200 hover:border-indigo-400"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-7 gap-1.5 sm:gap-2 text-center text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider py-1">
+                <div class="grid grid-cols-7 gap-2 text-center text-xs font-bold text-slate-400 uppercase tracking-wider py-2">
                     <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
                 </div>
 
-                <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 sm:gap-2.5"></div>
+                <div id="calendarGrid" class="grid grid-cols-7 gap-2.5"></div>
             </div>
 
             <!-- TAB 6: STATS -->
-            <div id="tab-stats" class="tab-content hidden glass-panel p-4 sm:p-8 rounded-2xl sm:rounded-3xl space-y-6">
+            <div id="tab-stats" class="tab-content hidden glass-panel p-6 sm:p-8 rounded-3xl space-y-8">
                 <div class="border-b border-white/10 pb-4">
-                    <h3 class="text-xl sm:text-2xl font-bold flex items-center space-x-2.5 text-white">
+                    <h3 class="text-2xl font-bold flex items-center space-x-3 text-white">
                         <i class="fa-solid fa-chart-pie text-emerald-400"></i>
-                        <span>Статистика и аналитика</span>
+                        <span>Статистика и аналитика заданий</span>
                     </h3>
                 </div>
 
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                    <div class="glass-input p-4 sm:p-5 rounded-2xl space-y-1 sm:space-y-2 border border-white/10">
-                        <span class="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase">Всего задач</span>
-                        <div class="flex items-baseline justify-between"><h4 id="statTotalTasks" class="text-2xl sm:text-3xl font-extrabold text-white">0</h4><i class="fa-solid fa-list-check text-indigo-400 text-base sm:text-xl"></i></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="glass-input p-5 rounded-2xl space-y-2 border border-white/10">
+                        <span class="text-xs font-semibold text-slate-400 uppercase">Всего задач</span>
+                        <div class="flex items-baseline justify-between"><h4 id="statTotalTasks" class="text-3xl font-extrabold text-white">0</h4><i class="fa-solid fa-list-check text-indigo-400 text-xl"></i></div>
                     </div>
-                    <div class="glass-input p-4 sm:p-5 rounded-2xl space-y-1 sm:space-y-2 border border-emerald-500/30 bg-emerald-950/10">
-                        <span class="text-[10px] sm:text-xs font-semibold text-emerald-300 uppercase">Выполнено</span>
-                        <div class="flex items-baseline justify-between"><h4 id="statCompletedTasks" class="text-2xl sm:text-3xl font-extrabold text-emerald-400">0</h4><i class="fa-solid fa-circle-check text-emerald-400 text-base sm:text-xl"></i></div>
+                    <div class="glass-input p-5 rounded-2xl space-y-2 border border-emerald-500/30 bg-emerald-950/10">
+                        <span class="text-xs font-semibold text-emerald-300 uppercase">Выполнено</span>
+                        <div class="flex items-baseline justify-between"><h4 id="statCompletedTasks" class="text-3xl font-extrabold text-emerald-400">0</h4><i class="fa-solid fa-circle-check text-emerald-400 text-xl"></i></div>
                     </div>
-                    <div class="glass-input p-4 sm:p-5 rounded-2xl space-y-1 sm:space-y-2 border border-amber-500/30 bg-amber-950/10">
-                        <span class="text-[10px] sm:text-xs font-semibold text-amber-300 uppercase">В работе</span>
-                        <div class="flex items-baseline justify-between"><h4 id="statPendingTasks" class="text-2xl sm:text-3xl font-extrabold text-amber-400">0</h4><i class="fa-solid fa-clock text-amber-400 text-base sm:text-xl"></i></div>
+                    <div class="glass-input p-5 rounded-2xl space-y-2 border border-amber-500/30 bg-amber-950/10">
+                        <span class="text-xs font-semibold text-amber-300 uppercase">В работе</span>
+                        <div class="flex items-baseline justify-between"><h4 id="statPendingTasks" class="text-3xl font-extrabold text-amber-400">0</h4><i class="fa-solid fa-clock text-amber-400 text-xl"></i></div>
                     </div>
-                    <div class="glass-input p-4 sm:p-5 rounded-2xl space-y-1 sm:space-y-2 border border-indigo-500/30 col-span-2 lg:col-span-1">
-                        <span class="text-[10px] sm:text-xs font-semibold text-indigo-300 uppercase">Процент успеха</span>
-                        <div class="flex items-baseline justify-between"><h4 id="statPercent" class="text-2xl sm:text-3xl font-extrabold text-indigo-400">0%</h4><i class="fa-solid fa-trophy text-indigo-400 text-base sm:text-xl"></i></div>
+                    <div class="glass-input p-5 rounded-2xl space-y-2 border border-indigo-500/30">
+                        <span class="text-xs font-semibold text-indigo-300 uppercase">Процент успеха</span>
+                        <div class="flex items-baseline justify-between"><h4 id="statPercent" class="text-3xl font-extrabold text-indigo-400">0%</h4><i class="fa-solid fa-trophy text-indigo-400 text-xl"></i></div>
                     </div>
                 </div>
 
-                <div class="glass-input p-5 sm:p-6 rounded-2xl space-y-3">
-                    <div class="flex justify-between items-center text-xs sm:text-sm">
-                        <span class="font-bold text-slate-200">Общий прогресс</span>
+                <div class="glass-input p-6 rounded-2xl space-y-3">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="font-bold text-slate-200">Общий прогресс выполнения</span>
                         <span id="statProgressBarText" class="font-mono font-bold text-indigo-300">0%</span>
                     </div>
-                    <div class="w-full bg-slate-900 rounded-full h-3 overflow-hidden border border-white/10">
+                    <div class="w-full bg-slate-900 rounded-full h-3.5 overflow-hidden border border-white/10">
                         <div id="statProgressBar" class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
                     </div>
                 </div>
@@ -490,8 +487,8 @@
 
         </main>
 
-        <footer class="glass-panel border-t border-white/15 mt-auto py-5 px-4 text-center text-[11px] sm:text-xs text-slate-400">
-            <p>© 2026 Курганский промышленный техникум (КПТ). Данные сохранены в браузере.</p>
+        <footer class="glass-panel border-t border-white/15 mt-auto py-6 px-6 text-center text-xs text-slate-400">
+            <p>© 2026 Курганский промышленный техникум (КПТ). Все данные надежно сохранены в браузере.</p>
         </footer>
     </div>
 
@@ -578,15 +575,15 @@
                 updateUIState();
                 document.getElementById('authModal').classList.remove('flex');
                 document.getElementById('authModal').classList.add('hidden');
-                showToast('Успешно', `Добро пожаловать, ${name}!`);
+                showToast('Успешно', `Добро пожаловать, ${name}!`, 'success');
             }
         }
 
         function updateUIState() {
             document.getElementById('userNameDisplay').textContent = currentUser;
             document.getElementById('welcomeUsername').textContent = currentUser;
-            document.getElementById('headerGroupSub').textContent = `Группа ${currentGroup}`;
-            document.getElementById('scheduleTitleText').textContent = `Расписание (Группа ${currentGroup})`;
+            document.getElementById('headerGroupSub').textContent = `Студенческий портал • Группа ${currentGroup}`;
+            document.getElementById('scheduleTitleText').textContent = `Расписание занятий (Группа ${currentGroup})`;
         }
 
         function openSettingsModal() {
@@ -604,7 +601,7 @@
             currentBg = bgClass;
             localStorage.setItem('kpt_bg_preset', bgClass);
             applyBackground(bgClass);
-            showToast('Оформление', 'Фон успешно изменен!');
+            showToast('Оформление', 'Фон успешно изменен!', 'success');
         }
 
         function applyBackground(bgClass) {
@@ -624,7 +621,7 @@
                 scheduleData = parsed;
                 localStorage.setItem('kpt_schedule', JSON.stringify(scheduleData));
                 renderScheduleDisplay();
-                showToast('Успешно', 'Расписание обновлено из JSON!');
+                showToast('Успешно', 'Расписание обновлено из JSON!', 'success');
                 closeSettingsModal();
             } catch (err) {
                 alert('Ошибка в формате JSON! Проверьте кавычки и запятые.');
@@ -636,7 +633,7 @@
             localStorage.setItem('kpt_schedule', JSON.stringify(scheduleData));
             initScheduleJsonInput();
             renderScheduleDisplay();
-            showToast('Сброс', 'Расписание сброшено.');
+            showToast('Сброс', 'Расписание сброшено по умолчанию.', 'info');
         }
 
         function renderHomework() {
@@ -646,25 +643,25 @@
             
             homeworkData.forEach(hw => {
                 const card = document.createElement('div');
-                card.className = `glass-input p-4 rounded-2xl flex flex-col justify-between border ${hw.done ? 'border-emerald-500/30 bg-emerald-950/10' : 'border-white/10'}`;
+                card.className = `glass-input p-5 rounded-2xl flex flex-col justify-between border ${hw.done ? 'border-emerald-500/30 bg-emerald-950/10' : 'border-white/10'}`;
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-center mb-2">
-                            <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-md">${hw.subject}</span>
-                            <span class="text-[11px] text-slate-400">${hw.deadline}</span>
+                            <span class="text-xs font-bold text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-md">${hw.subject}</span>
+                            <span class="text-xs text-slate-400">${hw.deadline}</span>
                         </div>
-                        <h4 class="font-bold text-sm sm:text-base text-white">${hw.title}</h4>
+                        <h4 class="font-bold text-base text-white">${hw.title}</h4>
                     </div>
                     <div class="mt-4 pt-3 border-t border-white/10 flex justify-between items-center">
                         <div class="flex items-center space-x-2">
-                            <span class="text-[11px] font-semibold ${hw.done ? 'text-emerald-400' : 'text-amber-400'}">${hw.done ? '✓ Сделано' : '⏳ В работе'}</span>
-                            <button onclick="toggleHw(${hw.id})" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold ${hw.done ? 'bg-slate-800 text-slate-300' : 'bg-emerald-600 text-white'}">
+                            <span class="text-xs font-semibold ${hw.done ? 'text-emerald-400' : 'text-amber-400'}">${hw.done ? '✓ Выполнено' : '⏳ В работе'}</span>
+                            <button onclick="toggleHw(${hw.id})" class="px-2.5 py-1 rounded-lg text-xs font-semibold ${hw.done ? 'bg-slate-800 text-slate-300' : 'bg-emerald-600 text-white'}">
                                 ${hw.done ? 'Вернуть' : 'Сдать'}
                             </button>
                         </div>
                         <div class="flex items-center space-x-1">
-                            <button onclick="editHomework(${hw.id})" title="Изменить" class="text-indigo-300 hover:text-white p-1.5"><i class="fa-solid fa-pen text-xs"></i></button>
-                            <button onclick="deleteHomework(${hw.id})" title="Удалить" class="text-rose-400 hover:text-rose-300 p-1.5"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                            <button onclick="editHomework(${hw.id})" title="Редактировать" class="text-indigo-300 hover:text-white p-1.5"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteHomework(${hw.id})" title="Удалить" class="text-rose-400 hover:text-rose-300 p-1.5"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </div>
                 `;
@@ -681,30 +678,30 @@
                 homeworkData.push({ id: Date.now(), subject, title, deadline, done: false });
                 localStorage.setItem('kpt_homework', JSON.stringify(homeworkData));
                 renderHomework();
-                showToast('Успешно', 'Задание добавлено.');
+                showToast('Успешно', 'Домашнее задание добавлено.', 'success');
             }
         }
 
         function editHomework(id) {
             const hw = homeworkData.find(i => i.id === id);
             if (!hw) return;
-            const newTitle = prompt('Измените название:', hw.title);
+            const newTitle = prompt('Измените название задания:', hw.title);
             if (newTitle !== null) {
                 hw.title = newTitle.trim();
-                const newDeadline = prompt('Измените срок:', hw.deadline);
+                const newDeadline = prompt('Измените срок сдачи:', hw.deadline);
                 if (newDeadline !== null) hw.deadline = newDeadline.trim();
                 localStorage.setItem('kpt_homework', JSON.stringify(homeworkData));
                 renderHomework();
-                showToast('Успешно', 'Задание обновлено.');
+                showToast('Успешно', 'Задание обновлено.', 'success');
             }
         }
 
         function deleteHomework(id) {
-            if (confirm('Удалить это домашнее задание?')) {
+            if (confirm('Вы уверены, что хотите удалить это домашнее задание?')) {
                 homeworkData = homeworkData.filter(i => i.id !== id);
                 localStorage.setItem('kpt_homework', JSON.stringify(homeworkData));
                 renderHomework();
-                showToast('Удалено', 'Задание удалено.');
+                showToast('Удалено', 'Задание удалено.', 'info');
             }
         }
 
@@ -714,7 +711,7 @@
                 hw.done = !hw.done;
                 localStorage.setItem('kpt_homework', JSON.stringify(homeworkData));
                 renderHomework();
-                showToast('Обновлено', 'Статус изменен.');
+                showToast('Обновлено', 'Статус задания изменен.', 'success');
             }
         }
 
@@ -738,17 +735,17 @@
                     let col = 'bg-emerald-500/20 text-emerald-300';
                     if (g === 4) col = 'bg-indigo-500/20 text-indigo-300';
                     if (g <= 3) col = 'bg-amber-500/20 text-amber-300';
-                    return `<span onclick="editGrade(${item.id}, ${idx})" class="inline-block px-1.5 py-0.5 rounded ${col} font-bold cursor-pointer text-xs">${g}</span>`;
+                    return `<span onclick="editGrade(${item.id}, ${idx})" title="Кликните для изменения/удаления" class="inline-block px-2 py-1 rounded ${col} font-bold cursor-pointer hover:scale-110 transition-transform">${g}</span>`;
                 }).join(' ');
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-white/5">
-                        <td class="py-3 px-3 font-medium text-white">${item.subject}</td>
-                        <td class="py-3 px-3 text-slate-300">${item.teacher}</td>
-                        <td class="py-3 px-3 space-x-1">${gradesHtml} <button onclick="addGradeToSubject(${item.id})" class="w-6 h-6 rounded-lg bg-white/5 text-indigo-300 text-[10px] inline-flex items-center justify-center ml-1"><i class="fa-solid fa-plus"></i></button></td>
-                        <td class="py-3 px-3 text-right font-bold text-emerald-400">${avg}</td>
-                        <td class="py-3 px-3 text-center">
-                            <button onclick="deleteDiarySubject(${item.id})" class="text-rose-400 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                        <td class="py-4 px-4 font-medium text-white">${item.subject}</td>
+                        <td class="py-4 px-4 text-slate-300">${item.teacher}</td>
+                        <td class="py-4 px-4 space-x-1">${gradesHtml} <button onclick="addGradeToSubject(${item.id})" title="Добавить оценку" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-indigo-300 text-xs inline-flex items-center justify-center ml-2"><i class="fa-solid fa-plus"></i></button></td>
+                        <td class="py-4 px-4 text-right font-bold text-emerald-400">${avg}</td>
+                        <td class="py-4 px-4 text-center">
+                            <button onclick="deleteDiarySubject(${item.id})" class="text-rose-400 hover:text-rose-300 p-1.5"><i class="fa-solid fa-trash-can"></i></button>
                         </td>
                     </tr>
                 `;
@@ -759,7 +756,7 @@
         }
 
         function addGradeToSubject(id) {
-            const val = prompt('Введите оценку (2, 3, 4 или 5):');
+            const val = prompt('Введите новую оценку (2, 3, 4 или 5):');
             if (val !== null) {
                 const gradeNum = parseInt(val.trim());
                 if ([2, 3, 4, 5].includes(gradeNum)) {
@@ -768,10 +765,10 @@
                         subj.grades.push(gradeNum);
                         localStorage.setItem('kpt_diary', JSON.stringify(diaryData));
                         renderDiary();
-                        showToast('Успешно', 'Оценка добавлена!');
+                        showToast('Успешно', 'Оценка добавлена!', 'success');
                     }
                 } else {
-                    alert('Введите число от 2 до 5.');
+                    alert('Введите корректную оценку от 2 до 5.');
                 }
             }
         }
@@ -780,7 +777,7 @@
             const subj = diaryData.find(s => s.id === subjectId);
             if (!subj) return;
             const currentVal = subj.grades[gradeIdx];
-            const val = prompt(`Оценка (${currentVal}). Введите новую или "0" для удаления:`, currentVal);
+            const val = prompt(`Измените оценку (${currentVal}) или введите "0" для удаления:`, currentVal);
             if (val !== null) {
                 const newNum = parseInt(val.trim());
                 if (newNum === 0) {
@@ -788,32 +785,32 @@
                 } else if ([2, 3, 4, 5].includes(newNum)) {
                     subj.grades[gradeIdx] = newNum;
                 } else {
-                    alert('Введите число от 2 до 5 или 0.');
+                    alert('Введите число от 2 до 5 или 0 для удаления.');
                     return;
                 }
                 localStorage.setItem('kpt_diary', JSON.stringify(diaryData));
                 renderDiary();
-                showToast('Дневник', 'Оценка обновлена.');
+                showToast('Дневник', 'Оценка обновлена.', 'success');
             }
         }
 
         function addDiarySubject() {
-            const subject = prompt('Название предмета:');
+            const subject = prompt('Введите название предмета:');
             if (subject) {
-                const teacher = prompt('ФИО преподавателя:') || 'Преподаватель';
+                const teacher = prompt('Введите ФИО преподавателя:') || 'Преподаватель';
                 diaryData.push({ id: Date.now(), subject, teacher, grades: [5] });
                 localStorage.setItem('kpt_diary', JSON.stringify(diaryData));
                 renderDiary();
-                showToast('Успешно', 'Предмет добавлен.');
+                showToast('Успешно', 'Предмет добавлен.', 'success');
             }
         }
 
         function deleteDiarySubject(id) {
-            if (confirm('Удалить предмет?')) {
+            if (confirm('Удалить этот предмет из дневника?')) {
                 diaryData = diaryData.filter(i => i.id !== id);
                 localStorage.setItem('kpt_diary', JSON.stringify(diaryData));
                 renderDiary();
-                showToast('Удалено', 'Предмет удален.');
+                showToast('Удалено', 'Предмет удален.', 'info');
             }
         }
 
@@ -827,22 +824,24 @@
                     <div class="glass-input p-3 rounded-xl border border-white/10 space-y-1">
                         <div class="flex justify-between items-center">
                             <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">${l.time}</span>
-                            <span class="text-[10px] text-slate-400 font-mono">Ауд. ${l.room || '—'}</span>
+                            <span class="text-[10px] text-slate-400 font-mono"><i class="fa-solid fa-location-dot text-indigo-400 mr-1"></i>Ауд. ${l.room || '—'}</span>
                         </div>
-                        <h5 class="font-bold text-xs sm:text-sm text-white pt-1">${l.subject}</h5>
-                        <p class="text-[11px] text-slate-400">${l.teacher || '—'}</p>
+                        <h5 class="font-bold text-sm text-white pt-1">${l.subject}</h5>
+                        <p class="text-xs text-slate-400 flex items-center"><i class="fa-solid fa-chalkboard-user mr-1.5 text-slate-500"></i>${l.teacher || '—'}</p>
                     </div>
                 `).join('');
 
                 container.innerHTML += `
-                    <div class="glass-card p-4 sm:p-5 rounded-2xl flex flex-col justify-between space-y-3">
+                    <div class="glass-card p-5 rounded-2xl flex flex-col justify-between space-y-4">
                         <div>
-                            <div class="flex justify-between items-center mb-2.5 pb-2 border-b border-white/10">
-                                <h4 class="font-extrabold text-sm sm:text-base text-indigo-300">${day}</h4>
-                                <span class="text-[10px] bg-white/5 text-slate-400 px-2 py-0.5 rounded-lg">${lessons.length} пар</span>
+                            <div class="flex justify-between items-center mb-3 pb-2 border-b border-white/10">
+                                <h4 class="font-extrabold text-base text-indigo-300 flex items-center">
+                                    <i class="fa-solid fa-calendar-day mr-2 text-indigo-400"></i>${day}
+                                </h4>
+                                <span class="text-[10px] bg-white/5 text-slate-400 px-2 py-0.5 rounded-lg">${lessons.length} пар(ы)</span>
                             </div>
-                            <div class="space-y-2">
-                                ${lessonsHtml.length ? lessonsHtml : '<p class="text-xs text-slate-500 italic text-center py-3">Выходной</p>'}
+                            <div class="space-y-2.5">
+                                ${lessonsHtml.length ? lessonsHtml : '<p class="text-xs text-slate-500 italic text-center py-4">Пар нет (выходной)</p>'}
                             </div>
                         </div>
                     </div>
@@ -868,7 +867,7 @@
 
             for (let i = firstDayIndex; i > 0; i--) {
                 const dayNum = prevTotalDays - i + 1;
-                grid.innerHTML += `<div class="glass-card p-2 rounded-xl h-20 sm:h-28 opacity-30 flex flex-col justify-between"><span class="text-[11px] font-bold text-slate-500">${dayNum}</span></div>`;
+                grid.innerHTML += `<div class="glass-card p-3 rounded-2xl h-28 opacity-30 flex flex-col justify-between cursor-not-allowed"><span class="text-xs font-bold text-slate-500">${dayNum}</span></div>`;
             }
 
             for (let day = 1; day <= totalDays; day++) {
@@ -879,16 +878,16 @@
                 let notesHtml = notes.map(n => {
                     let bgCol = 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30';
                     if(n.priority === 'high') bgCol = 'bg-rose-500/20 text-rose-300 border-rose-500/30';
-                    return `<div class="text-[9px] sm:text-[10px] px-1 py-0.5 rounded border truncate ${bgCol}"><span class="font-mono">${n.time}</span> ${n.text}</div>`;
+                    return `<div class="text-[10px] px-1.5 py-0.5 rounded border truncate ${bgCol}"><span class="font-mono font-bold">${n.time}</span> ${n.text}</div>`;
                 }).join('');
 
                 grid.innerHTML += `
-                    <div onclick="openCalendarModal('${dateStr}')" class="glass-card p-1.5 sm:p-2.5 rounded-xl h-20 sm:h-28 flex flex-col justify-between cursor-pointer hover:border-indigo-400 transition-all relative group overflow-hidden">
+                    <div onclick="openCalendarModal('${dateStr}')" class="glass-card p-3 rounded-2xl h-28 flex flex-col justify-between cursor-pointer hover:border-indigo-400 transition-all relative group overflow-hidden">
                         <div class="flex justify-between items-center">
-                            <span class="text-[11px] sm:text-xs font-bold text-slate-200">${day}</span>
-                            ${notes.length ? `<span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-indigo-400"></span>` : ''}
+                            <span class="text-xs font-bold text-slate-200 group-hover:text-indigo-300">${day}</span>
+                            ${notes.length ? `<span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>` : ''}
                         </div>
-                        <div class="space-y-0.5 overflow-y-auto max-h-10 sm:max-h-16 pr-0.5">${notesHtml}</div>
+                        <div class="space-y-1 overflow-y-auto max-h-16 pr-0.5">${notesHtml}</div>
                     </div>
                 `;
             }
@@ -925,14 +924,14 @@
             container.innerHTML = '';
             const notes = calendarNotes[dateStr] || [];
             if(notes.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-500 italic">Нет заметок.</p>`;
+                container.innerHTML = `<p class="text-xs text-slate-500 italic">На этот день нет заметок.</p>`;
                 return;
             }
             notes.forEach(n => {
                 container.innerHTML += `
-                    <div class="glass-input p-2 rounded-xl flex justify-between items-center text-xs">
-                        <div><span class="font-mono text-indigo-300 font-bold mr-1.5">[${n.time}]</span><span class="text-slate-200">${n.text}</span></div>
-                        <button onclick="deleteCalendarNote('${dateStr}', ${n.id})" class="text-rose-400 px-2 py-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                    <div class="glass-input p-2.5 rounded-xl flex justify-between items-center text-xs">
+                        <div><span class="font-mono text-indigo-300 font-bold mr-2">[${n.time}]</span><span class="text-slate-200">${n.text}</span></div>
+                        <button onclick="deleteCalendarNote('${dateStr}', ${n.id})" class="text-rose-400 hover:text-rose-300 px-2 py-1"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                 `;
             });
@@ -951,7 +950,7 @@
             document.getElementById('noteText').value = '';
             renderModalNotes(dateStr);
             renderCalendar();
-            showToast('Успешно', 'Заметка сохранена!');
+            showToast('Успешно', 'Заметка сохранена!', 'success');
         }
 
         function deleteCalendarNote(dateStr, id) {
@@ -961,7 +960,7 @@
                 localStorage.setItem('kpt_calendar_notes', JSON.stringify(calendarNotes));
                 renderModalNotes(dateStr);
                 renderCalendar();
-                showToast('Успешно', 'Заметка удалена.');
+                showToast('Успешно', 'Заметка удалена.', 'info');
             }
         }
 
@@ -972,7 +971,7 @@
                 const btn = document.getElementById(`tab-btn-${t}`);
                 if (content) content.classList.toggle('hidden', t !== tabId);
                 if (btn) {
-                    btn.className = `shrink-0 py-2.5 px-4 rounded-xl font-semibold text-xs sm:text-sm transition-all flex items-center space-x-2 ${t === tabId ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-300 hover:text-white hover:bg-white/5'}`;
+                    btn.className = `flex-1 min-w-[130px] py-3 px-4 rounded-xl font-semibold text-sm transition-all flex items-center justify-center space-x-2 ${t === tabId ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-300 hover:text-white hover:bg-white/5'}`;
                 }
             });
             if(tabId === 'stats') updateStatistics();
