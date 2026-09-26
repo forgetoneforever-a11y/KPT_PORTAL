@@ -27,10 +27,11 @@ WEBHOOK_URL = f"https://kpt-portal.onrender.com/webhook/{TOKEN}"
 async def lifespan(app: FastAPI):
   # Устанавливаем вебхук при старте
   await bot.set_webhook(WEBHOOK_URL)
-  print(f"Webhook set to: {WEBHOOK_URL}")
+  print(f"Webhook successfully set to: {WEBHOOK_URL}")
   yield
-  # Удаляем вебхук при выключении
+  # Очистка при выключении
   await bot.delete_webhook()
+  await bot.session.close()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -42,22 +43,28 @@ async def index(request: Request):
   return templates.TemplateResponse(request, "index.html")
 
 
+async def process_update(update_data: dict):
+  try:
+    update = types.Update.model_validate(update_data, context={"bot": bot})
+    await dp.feed_update(bot, update)
+  except Exception:
+    import traceback
+
+    traceback.print_exc()  # Покажет точную ошибку бота в логах Render, если она возникнет
+
+
 @app.post(f"/webhook/{TOKEN}")
 async def telegram_webhook(request: Request):
   try:
     json_data = await request.json()
-    update = types.Update.model_validate(json_data, context={"bot": bot})
-
-    # Запускаем обработку апдейта в фоновой задаче,
-    # чтобы Telegram сразу получил ответ 200 OK и не ждал завершения всей логики бота
-    asyncio.create_task(dp.feed_update(bot, update))
-
+    # Запускаем в фоне, но с отловом ошибок внутри процесса
+    asyncio.create_task(process_update(json_data))
     return {"status": "ok"}
-  except Exception as e:
+  except Exception:
     import traceback
 
     traceback.print_exc()
-    return JSONResponse(status_code=500, content={"error": str(e)})
+    return JSONResponse(status_code=500, content={"status": "error"})
 
 
 if __name__ == "__main__":
