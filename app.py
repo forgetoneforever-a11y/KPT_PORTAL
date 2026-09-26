@@ -8,9 +8,8 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 TOKEN = os.getenv("BOT_TOKEN", "8977128124:AAFtlQj5f08BR94kd2_WCNwX0FXMq8Fo0h4")
 WEB_APP_URL = os.getenv("RENDER_EXTERNAL_URL", "https://kpt-portal.onrender.com")
 
-# Инициализация Flask и Aiogram
+# Инициализация Flask и Dispatcher (бот создается локально под каждый запрос)
 app = Flask(__name__)
-bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
 # Настройка клавиатур
@@ -71,11 +70,15 @@ def index():
 
 @app.route(f"/webhook/{TOKEN}", methods=["POST"])
 def telegram_webhook():
-    """Синхронный роут Flask, который безопасно передает апдейт в aiogram через asyncio.run"""
-    update = types.Update.model_validate(
-        request.get_json(force=True), context={"bot": bot}
-    )
-    asyncio.run(dp.feed_update(bot, update))
+    """Создает изолированный контекст бота и сессии на каждый запрос"""
+    async def process_update():
+        async with Bot(token=TOKEN) as local_bot:
+            update = types.Update.model_validate(
+                request.get_json(force=True), context={"bot": local_bot}
+            )
+            await dp.feed_update(local_bot, update)
+
+    asyncio.run(process_update())
     return "OK", 200
 
 
