@@ -3,9 +3,7 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-# Используем ваш токен (или берем из переменных окружения на Render)
 TOKEN = os.getenv("BOT_TOKEN", "8977128124:AAFtlQj5f08BR94kd2_WCNwX0FXMq8Fo0h4")
-ADMIN_ID = 8617178928  # Ваш Telegram ID
 
 # Получаем URL сайта из переменных окружения на Render (или подставляем шаблон)
 WEB_APP_URL = os.getenv("RENDER_EXTERNAL_URL", "https://college-organizer-bot.onrender.com")
@@ -32,11 +30,8 @@ def get_inline_keyboard():
 
 @dp.message(Command("start"))
 async def start_command(message: types.Message):
-    # Проверяем, кто написал боту (вы или кто-то другой)
-    if message.from_user.id == ADMIN_ID:
-        greeting = "Привет, Ярослав! 👋 Твой админский портал готов к работе."
-    else:
-        greeting = "Привет! Я твой бот-помощник для учебы. 📚"
+    # Убрали проверку ADMIN_ID, теперь приветствие универсальное для всех
+    greeting = "Привет! Я твой бот-помощник для учебы. 📚"
 
     await message.answer(
         f"{greeting}\nИспользуй кнопки ниже для быстрого доступа:",
