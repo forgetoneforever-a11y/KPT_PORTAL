@@ -8,7 +8,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 TOKEN = os.getenv("BOT_TOKEN", "8977128124:AAFtlQj5f08BR94kd2_WCNwX0FXMq8Fo0h4")
 WEB_APP_URL = os.getenv("RENDER_EXTERNAL_URL", "https://kpt-portal.onrender.com")
 
-# Инициализация Flask и Dispatcher (бот создается локально под каждый запрос)
+# Инициализация Flask и Dispatcher
 app = Flask(__name__)
 dp = Dispatcher()
 
@@ -62,7 +62,7 @@ async def echo_message(message: types.Message):
     await message.answer(f"Я тебя услышал! Напиши /start, чтобы обновить меню.")
 
 
-# --- Роуты Flask для сайта и вебхука ---
+# --- Роуты Flask для сайта, вебхука и API заметок ---
 
 @app.route("/")
 def index():
@@ -70,7 +70,7 @@ def index():
 
 @app.route(f"/webhook/{TOKEN}", methods=["POST"])
 def telegram_webhook():
-    """Создает изолированный контекст бота и сессии на каждый запрос"""
+    """Создает изолированный контекст бота и сессии на каждый запрос от Telegram"""
     async def process_update():
         async with Bot(token=TOKEN) as local_bot:
             update = types.Update.model_validate(
@@ -80,6 +80,29 @@ def telegram_webhook():
 
     asyncio.run(process_update())
     return "OK", 200
+
+@app.route("/api/send-note", methods=["POST"])
+def send_note_to_telegram():
+    """Принимает заметки/напоминания с сайта и пересылает их в Telegram"""
+    data = request.get_json(force=True)
+    chat_id = data.get("chat_id")
+    note_text = data.get("text")
+    
+    if not chat_id or not note_text:
+        return {"error": "Missing chat_id or text"}, 400
+
+    async def send_msg():
+        async with Bot(token=TOKEN) as local_bot:
+            await local_bot.send_message(
+                chat_id=chat_id, 
+                text=f"🔔 **Напоминание / Заметка:**\n\n{note_text}"
+            )
+
+    try:
+        asyncio.run(send_msg())
+        return {"status": "success"}, 200
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 
 if __name__ == "__main__":
