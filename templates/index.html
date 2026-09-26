@@ -226,7 +226,7 @@
 
     <!-- Toast Notification -->
     <div id="toast" class="fixed top-5 right-5 z-50 transform translate-x-full transition-all duration-300 opacity-0 max-w-sm">
-        <div class="glass-panel px-4 py-3 rounded-2xl flex items-center space-x-3 border-l-4 border-l-indigo-400 shadow-xl">
+        <div id="toast-panel" class="glass-panel px-4 py-3 rounded-2xl flex items-center space-x-3 border-l-4 border-l-indigo-400 shadow-xl">
             <i id="toast-icon" class="fa-solid fa-circle-info text-indigo-400 text-xl"></i>
             <div>
                 <h5 id="toast-title" class="font-bold text-sm">Уведомление</h5>
@@ -476,7 +476,7 @@
 
                 <div class="glass-input p-6 rounded-2xl space-y-3">
                     <div class="flex justify-between items-center text-sm">
-                        <span class="font-bold text-slate-200">Общий прогресс выполнения</span>
+                        <span class="font-bold text-slate-200">Общий прогресс выполнения (по домашним заданиям)</span>
                         <span id="statProgressBarText" class="font-mono font-bold text-indigo-300">0%</span>
                     </div>
                     <div class="w-full bg-slate-900 rounded-full h-3.5 overflow-hidden border border-white/10">
@@ -624,7 +624,7 @@
                 showToast('Успешно', 'Расписание обновлено из JSON!', 'success');
                 closeSettingsModal();
             } catch (err) {
-                alert('Ошибка в формате JSON! Проверьте кавычки и запятые.');
+                showToast('Ошибка', 'Неверный формат JSON! Проверьте кавычки и запятые.', 'error');
             }
         }
 
@@ -978,10 +978,18 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function showToast(title, msg) {
+        function showToast(title, msg, type = 'success') {
             const toast = document.getElementById('toast');
+            const panel = document.getElementById('toast-panel');
+            const icon = document.getElementById('toast-icon');
+            
             document.getElementById('toast-title').textContent = title;
             document.getElementById('toast-msg').textContent = msg;
+
+            // Настройка иконок и цветов в зависимости от типа уведомления
+            panel.className = `glass-panel px-4 py-3 rounded-2xl flex items-center space-x-3 shadow-xl border-l-4 ${type === 'error' ? 'border-l-rose-500' : type === 'info' ? 'border-l-sky-400' : 'border-l-indigo-400'}`;
+            icon.className = `fa-solid ${type === 'error' ? 'fa-circle-exclamation text-rose-400' : type === 'info' ? 'fa-circle-info text-sky-400' : 'fa-circle-check text-indigo-400'} text-xl`;
+
             toast.classList.remove('translate-x-full', 'opacity-0');
             setTimeout(() => toast.classList.add('translate-x-full', 'opacity-0'), 3500);
         }
@@ -989,17 +997,12 @@
         function updateStatistics() {
             const totalHw = homeworkData.length;
             const completedHw = homeworkData.filter(h => h.done).length;
-            let totalNotes = 0;
-            for (const dateKey in calendarNotes) {
-                totalNotes += calendarNotes[dateKey].length;
-            }
-            const grandTotal = totalHw + totalNotes;
-            const grandCompleted = completedHw; 
-            const percent = grandTotal > 0 ? Math.round((grandCompleted / grandTotal) * 100) : 0;
+            
+            const percent = totalHw > 0 ? Math.round((completedHw / totalHw) * 100) : 0;
 
-            document.getElementById('statTotalTasks').textContent = grandTotal;
-            document.getElementById('statCompletedTasks').textContent = grandCompleted;
-            document.getElementById('statPendingTasks').textContent = grandTotal - grandCompleted;
+            document.getElementById('statTotalTasks').textContent = totalHw;
+            document.getElementById('statCompletedTasks').textContent = completedHw;
+            document.getElementById('statPendingTasks').textContent = totalHw - completedHw;
             document.getElementById('statPercent').textContent = `${percent}%`;
             document.getElementById('statProgressBar').style.width = `${percent}%`;
             document.getElementById('statProgressBarText').textContent = `${percent}%`;
