@@ -1,28 +1,89 @@
 import os
-import asyncio
-import threading
-from flask import Flask, render_template
-from bot import dp, bot
+from flask import Flask, render_template, request, jsonify
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters import Command
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
+TOKEN = os.getenv("BOT_TOKEN", "8977128124:AAFtlQj5f08BR94kd2_WCNwX0FXMq8Fo0h4")
+WEB_APP_URL = os.getenv("RENDER_EXTERNAL_URL", "https://kpt-portal.onrender.com")
+
+# Инициализация Flask и Aiogram
 app = Flask(__name__)
+bot = Bot(token=TOKEN)
+dp = Dispatcher()
+
+# Настройка клавиатур
+def get_main_keyboard():
+    builder = ReplyKeyboardBuilder()
+    builder.button(text="🌐 Открыть сайт колледжа")
+    builder.button(text="📅 Расписание на сегодня")
+    builder.button(text="ℹ️ Помощь")
+    builder.adjust(2, 1)
+    return builder.as_markup(resize_keyboard=True)
+
+def get_inline_keyboard():
+    builder = InlineKeyboardBuilder()
+    builder.button(text="🔗 Сайт организатора", url=WEB_APP_URL)
+    builder.button(text="🔔 Включить уведомления", callback_data="enable_notifications")
+    builder.adjust(1)
+    return builder.as_markup()
+
+# Хендлеры бота
+@dp.message(Command("start"))
+async def start_command(message: types.Message):
+    greeting = "Привет! Я твой бот-помощник для учебы. 📚"
+    await message.answer(
+        f"{greeting}\nИспользуй кнопки ниже для быстрого доступа:",
+        reply_markup=get_main_keyboard()
+    )
+
+@dp.message(lambda msg: msg.text == "🌐 Открыть сайт колледжа")
+async def open_site_btn(message: types.Message):
+    await message.answer(
+        "Нажми на кнопку ниже, чтобы открыть портал:",
+        reply_markup=get_inline_keyboard()
+    )
+
+@dp.message(lambda msg: msg.text == "📅 Расписание на сегодня")
+async def schedule_btn(message: types.Message):
+    await message.answer("📅 Твое расписание на сегодня:\n1. Технология машиностроения\n2. Инженерная графика\n3. Базы данных")
+
+@dp.message(lambda msg: msg.text == "ℹ️ Помощь")
+async def help_btn(message: types.Message):
+    await message.answer("Я помогаю следить за учебой, присылаю уведомления и открываю доступ к сайту.")
+
+@dp.callback_query(lambda query: query.data == "enable_notifications")
+async def process_callback(callback: types.CallbackQuery):
+    await callback.answer("Уведомления успешно включены! ✅", show_alert=True)
+    await callback.message.edit_text("✅ Уведомления активированы для этого чата.")
+
+@dp.message()
+async def echo_message(message: types.Message):
+    await message.answer(f"Я тебя услышал! Напиши /start, чтобы обновить меню.")
+
+
+# --- Роуты Flask для сайта и вебхука ---
 
 @app.route("/")
 def index():
-    # Flask ищет index.html в папке templates/
     return render_template("index.html")
 
-def run_telegram_bot():
-    """Функция для запуска бота в асинхронном цикле"""
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    # Отключаем перехват сигналов, так как запуск идет не в главном потоке
-    loop.run_until_complete(dp.start_polling(bot, handle_signals=False))
+@app.route(f"/webhook/{TOKEN}", methods=["POST"])
+async def telegram_webhook():
+    """Этот маршрут принимает запросы от Telegram"""
+    update = types.Update.model_validate(
+        request.get_json(force=True), context={"bot": bot}
+    )
+    await dp.feed_update(bot, update)
+    return "OK", 200
+
 
 if __name__ == "__main__":
-    # Запускаем Telegram-бота в фоновом потоке, чтобы он не мешал сайту
-    bot_thread = threading.Thread(target=run_telegram_bot, daemon=True)
-    bot_thread.start()
-
-    # Получаем порт от Render (или ставим 5000 по умолчанию для локального теста)
-    port = int(os.environ.get("PORT", 5000))
+    # При старте приложения регистрируем Webhook в Telegram автоматически
+    import requests
+    webhook_url = f"{WEB_APP_URL}/webhook/{TOKEN}"
+    requests.get(f"https://api.telegram.org/bot{TOKEN}/setWebhook?url={webhook_url}")
+    
+    # Запускаем Flask-сервер
+    port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
