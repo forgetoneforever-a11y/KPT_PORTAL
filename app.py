@@ -15,7 +15,8 @@ def run_telegram_bot():
     """Функция для запуска бота в асинхронном цикле"""
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(dp.start_polling(bot))
+    # Отключаем перехват сигналов, так как запуск идет не в главном потоке
+    loop.run_until_complete(dp.start_polling(bot, handle_signals=False))
 
 if __name__ == "__main__":
     # Запускаем Telegram-бота в фоновом потоке, чтобы он не мешал сайту
